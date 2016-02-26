@@ -1,0 +1,32 @@
+{
+  "name": "postcss-sassy-import",
+  "version": "0.1.0",
+  "description": "A sassy import targeted at PostCSS + Sass pipelines",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LPGhatguy/postcss-sassy-import.git"
+  },
+  "keywords": [
+    "postcss-plugin",
+    "sass",
+    "node-sass"
+  ],
+  "author": "Lucien Greathouse <me@lpghatguy.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/LPGhatguy/postcss-sassy-import/issues"
+  },
+  "homepage": "https://github.com/LPGhatguy/postcss-sassy-import#readme",
+  "dependencies": {
+    "glob": "^7.0.0",
+    "postcss": "^5.0.17",
+    "postcss-scss": "^0.1.5"
+  },
+  "engines": {
+    "node": ">=5.0"
+  }
+}
