@@ -204,6 +204,10 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 				// Strip off quotes, single and double
 				const matches = node.params.trim().match(/^['"](.+?)['"](.*)/);
 
+				if (matches == null) {
+					return;
+				}
+
 				const modes = matches[2].trim().split(" ");
 				const fragment = matches[1];
 
