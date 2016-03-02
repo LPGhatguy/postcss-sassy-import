@@ -133,6 +133,11 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 					return fsUtil.getFileOneOf(possible);
 				})
 				.then((file) => {
+					// TODO: better error handler
+					if (file instanceof Error) {
+						throw file;
+					}
+
 					if (dedup && loaded.has(file.path)) {
 						return;
 					}
