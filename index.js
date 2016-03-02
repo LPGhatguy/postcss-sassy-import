@@ -121,7 +121,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 
 	return (css, result) => {
 		// Returns Promise<PostCSSNode>
-		const processNormal = (unresolved, options) => {
+		const processNormal = (unresolved, fragment, options) => {
 			const dedup = options.dedup;
 
 			let mergedOpts = Object.assign({}, opts, options);
@@ -133,9 +133,8 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 					return fsUtil.getFileOneOf(possible);
 				})
 				.then((file) => {
-					// TODO: better error handler
 					if (file instanceof Error) {
-						throw file;
+						throw new Error(`Couldn't find import "${fragment}".\n${file.message}`);
 					}
 
 					if (dedup && loaded.has(file.path)) {
@@ -152,7 +151,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 		};
 
 		// Returns Promise<PostCSSNode[]>
-		const processGlob = (unresolved, options) => {
+		const processGlob = (unresolved, fragment, options) => {
 			const dedup = options.dedup;
 
 			let mergedOpts = Object.assign({}, opts, options);
@@ -230,7 +229,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 
 				if (glob.hasMagic(fragment)) {
 					prom = prom.then(() => {
-						return processGlob(unresolved, {
+						return processGlob(unresolved, fragment, {
 							dedup: dedupThis
 						});
 					}).then(newNodes => {
@@ -242,7 +241,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 					});
 				} else {
 					prom = prom.then(() => {
-						return processNormal(unresolved, {
+						return processNormal(unresolved, fragment, {
 							dedup: dedupThis
 						});
 					}).then(newNode => {
