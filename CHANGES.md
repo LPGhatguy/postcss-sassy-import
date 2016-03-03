@@ -1,4 +1,5 @@
 # 0.2.0 (WiP)
+- More stable plugin loading
 - More helpful error messages when imports fail
 - Renamed 'dedup' option to 'dedupe'
 

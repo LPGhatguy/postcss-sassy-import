@@ -1,9 +1,10 @@
 # postcss-sassy-import
-	A sassy import targeted at PostCSS + Sass pipelines
 
 ```sh
 npm install postcss-sassy-import
 ```
+
+*requires Node 5.0+*
 
 postcss-sassy-import is an alternative to a number of import possibilities:
 - Stock SCSS imports
