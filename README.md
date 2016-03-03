@@ -148,6 +148,12 @@ Enable to deduplicate imports by default. Opt in and out of deduplication by usi
 
 A list of formats to try to resolve a path with. `%` in the string is replaced with the file name, and the directory of the file is prepended to the result.
 
+#### loadPaths
+- `(() => string)[]`
+- default: see source (loads current directory)
+
+A list of paths to load. Paths are specified with functions that are passed the file an import is being called from. They should return an absolute path to load from.
+
 #### loaders
 - `array`
 - default: see source (loads scss, css, and json)

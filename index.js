@@ -69,7 +69,9 @@ function applyDefaultOptions(opts) {
 		opts.formats = defaultFormats.slice();
 	}
 
-	const defaultLoadPaths = ["."];
+	const defaultLoadPaths = [
+		(origin) => path.dirname(origin)
+	];
 
 	if (opts.loadPaths) {
 		let paths = opts.loadPaths;
