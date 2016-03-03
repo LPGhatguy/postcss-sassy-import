@@ -6,18 +6,19 @@ npm install postcss-sassy-import
 
 *requires Node 5.0+*
 
-postcss-sassy-import is an alternative to a number of import possibilities:
-- Stock SCSS imports
-- node-sass import plugins (like [node-sass-glob-once](https://github.com/LPGhatguy/node-sass-glob-once))
-- [postcss-import](https://github.com/postcss/postcss-import)
+## Goal
+This plugin aims to implement imports like Sass, with select extensions and further plugin opportunities. At base, this yields:
 
-postcss-sassy-import is not limited to SCSS, however! It can import vanilla CSS, JSON, or most anything else with a little bit of extension.
+- Inlining (like [postcss-import](https://github.com/postcss/postcss-import))
+- Globbing (like [Ruby sass-globbing](https://github.com/chriseppstein/sass-globbing))
+- Single-import by default (like [node-sass-glob-once](https://github.com/LPGhatguy/node-sass-glob-once))
 
-## Why not Sass imports?
-Stock Sass imports don't handle globbing or single-file imports. Even with node-sass import plugins, mixing and matching functionality is difficult and error-prone.
+postcss-sassy-import is not limited to SCSS, however! It can run on any syntax that PostCSS supports, and can import vanilla CSS, SCSS, and JSON out of the box!
+
+There's also a simple plugin system for adding new resolvers, formats, and load paths.
 
 ## Why not postcss-import?
-The authors of postcss-import are trying to [follow the CSS specification](https://github.com/postcss/postcss-import/issues/176#issuecomment-188995732) somewhat, which means that support for extra features is second-class.
+The authors of postcss-import are trying to [follow the CSS specification](https://github.com/postcss/postcss-import/issues/176#issuecomment-188995732), which means that support for extra features is second-class.
 
 ## Usage
 Write imports how you want to write them:

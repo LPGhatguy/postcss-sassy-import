@@ -52,7 +52,7 @@ function applyDefaultOptions(opts) {
 	opts.dedupe = opts.dedupe != null ? !!opts.dedupe : true;
 
 	// File formats we accept
-	opts.formats = opts.formats || [
+	const defaultFormats = [
 		"%", // full file path
 		"%.scss", // SCSS
 		"_%.scss", // SCSS partial
@@ -61,12 +61,28 @@ function applyDefaultOptions(opts) {
 		"%/style.scss" // Folder containing SCSS
 	];
 
-	opts.loadPaths = opts.loadPaths || ["."];
+	if (opts.formats) {
+		let forms = opts.formats;
+
+		opts.formats = [...defaultFormats, ...forms];
+	} else {
+		opts.formats = defaultFormats.slice();
+	}
+
+	const defaultLoadPaths = ["."];
+
+	if (opts.loadPaths) {
+		let paths = opts.loadPaths;
+
+		opts.loadPaths = [...defaultLoadPaths, ...paths];
+	} else {
+		opts.loadPaths = defaultLoadPaths.slice();
+	}
 
 	// Loaders based on file
 	// For these loaders, the only plugin PostCSS needs is this import plugin.
 	// All other plugins will run over the source afterwards.
-	opts.loaders = opts.loaders || [
+	const defaultLoaders = [
 		{
 			test: (file) => /\.scss$/.test(file),
 			method: (wrapped, opts) => {
@@ -106,6 +122,14 @@ function applyDefaultOptions(opts) {
 		}
 	];
 
+	if (opts.loaders) {
+		let loaders = opts.loaders;
+
+		opts.loaders = [...defaultLoaders, opts.loaders];
+	} else {
+		opts.loaders = defaultLoaders.slice();
+	}
+
 	opts.resolver = opts.resolver || ((unresolved) => fsUtil.resolvePath(opts.formats, unresolved));
 }
 
@@ -121,8 +145,6 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 
 		delete opts.plugins;
 	}
-
-	applyDefaultOptions(opts);
 
 	const loaded = opts.loaded;
 	const dedupe = opts.dedupe;
