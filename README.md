@@ -134,7 +134,7 @@ gulp.task("styles", () => {
 ## Configuration
 postcss-sassy-import takes in some configuration options and does some stuff with them.
 
-#### dedup
+#### dedupe
 - `boolean`
 - default: `true`
 

@@ -45,17 +45,14 @@ function globPromise(dir) {
 	});
 }
 
-plugin = postcss.plugin("postcss-sassy-import", function(opts) {
-	opts = Object.assign({}, opts) || {};
-
+function applyDefaultOptions(opts) {
 	// Files that have already been loaded
-	const loaded = opts.loaded || new Set();
-	opts.loaded = loaded;
+	opts.loaded = opts.loaded || new Set();
 
-	const dedup = opts.dedup != null ? opts.dedup : true;
+	opts.dedupe = opts.dedupe != null ? !!opts.dedupe : true;
 
 	// File formats we accept
-	const formats = opts.formats || [
+	opts.formats = opts.formats || [
 		"%", // full file path
 		"%.scss", // SCSS
 		"_%.scss", // SCSS partial
@@ -64,12 +61,12 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 		"%/style.scss" // Folder containing SCSS
 	];
 
-	opts.formats = formats;
+	opts.loadPaths = opts.loadPaths || ["."];
 
 	// Loaders based on file
 	// For these loaders, the only plugin PostCSS needs is this import plugin.
 	// All other plugins will run over the source afterwards.
-	const loaders = opts.loaders || [
+	opts.loaders = opts.loaders || [
 		{
 			test: (file) => /\.scss$/.test(file),
 			method: (wrapped, opts) => {
@@ -109,7 +106,13 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 		}
 	];
 
-	opts.loaders = loaders;
+	opts.resolver = opts.resolver || ((unresolved) => fsUtil.resolvePath(opts.formats, unresolved));
+}
+
+plugin = postcss.plugin("postcss-sassy-import", function(opts) {
+	opts = Object.assign({}, opts) || {};
+
+	applyDefaultOptions(opts);
 
 	if (opts.plugins) {
 		opts.plugins.forEach(plugin => {
@@ -119,16 +122,23 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 		delete opts.plugins;
 	}
 
+	applyDefaultOptions(opts);
+
+	const loaded = opts.loaded;
+	const dedupe = opts.dedupe;
+	const loaders = opts.loaders;
+	const resolver = opts.resolver;
+
 	return (css, result) => {
 		// Returns Promise<PostCSSNode>
 		const processNormal = (unresolved, fragment, options) => {
-			const dedup = options.dedup;
+			const dedupe = options.dedupe;
 
 			let mergedOpts = Object.assign({}, opts, options);
 
 			return Promise.resolve()
 				.then(() => {
-					const possible = fsUtil.resolvePath(formats, unresolved);
+					const possible = resolver(unresolved);
 
 					return fsUtil.getFileOneOf(possible);
 				})
@@ -137,7 +147,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 						throw new Error(`Couldn't find import "${fragment}".\n${file.message}`);
 					}
 
-					if (dedup && loaded.has(file.path)) {
+					if (dedupe && loaded.has(file.path)) {
 						return;
 					}
 
@@ -152,7 +162,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 
 		// Returns Promise<PostCSSNode[]>
 		const processGlob = (unresolved, fragment, options) => {
-			const dedup = options.dedup;
+			const dedupe = options.dedupe;
 
 			let mergedOpts = Object.assign({}, opts, options);
 
@@ -160,7 +170,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 				.then(() => globPromise(unresolved))
 				.then(matches => {
 					// Early-out for globbed files
-					if (dedup) {
+					if (dedupe) {
 						matches = matches.filter(file => !loaded.has(file));
 					}
 
@@ -180,7 +190,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 
 						prom = prom.then((result) => {
 							// This file could've been loaded as a dep earlier in the glob
-							if (dedup && loaded.has(match.path)) {
+							if (dedupe && loaded.has(match.path)) {
 								return result;
 							}
 
@@ -215,12 +225,12 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 				const modes = matches[2].trim().split(" ");
 				const fragment = matches[1];
 
-				let dedupThis = dedup;
+				let dedupeThis = dedupe;
 
 				if (modes.indexOf("!once") > -1) {
-					dedupThis = true;
+					dedupeThis = true;
 				} else if (modes.indexOf("!multiple") > -1) {
-					dedupThis = false;
+					dedupeThis = false;
 				}
 
 				const origin = node.source.input.file;
@@ -230,7 +240,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 				if (glob.hasMagic(fragment)) {
 					prom = prom.then(() => {
 						return processGlob(unresolved, fragment, {
-							dedup: dedupThis
+							dedupe: dedupeThis
 						});
 					}).then(newNodes => {
 						if (newNodes.length > 0) {
@@ -242,7 +252,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 				} else {
 					prom = prom.then(() => {
 						return processNormal(unresolved, fragment, {
-							dedup: dedupThis
+							dedupe: dedupeThis
 						});
 					}).then(newNode => {
 						if (newNode) {
