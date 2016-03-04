@@ -11,8 +11,8 @@
 let plugin;
 
 const path = require("path");
-const glob = require("glob");
 
+const glob = require("./lib/glob");
 const fsUtil = require("./lib/fs-util");
 const toSCSS = require("./lib/to-scss");
 
@@ -23,26 +23,11 @@ const syntaxSCSS = require("postcss-scss");
  * Takes a resolved file path and returns the correct loader for it, if one is found.
  */
 function getLoader(loaders, filePath) {
-	for (const loader of loaders) {
+	for (let loader of loaders) {
 		if (loader.test(filePath)) {
 			return loader.method;
 		}
 	}
-}
-
-/**
- * A promiseified version of glob
- */
-function globPromise(dir) {
-	return new Promise((resolve, reject) => {
-		glob(dir, (err, matches) => {
-			if (err) {
-				return reject(err);
-			}
-
-			resolve(matches);
-		});
-	});
 }
 
 function applyDefaultOptions(opts) {
@@ -179,6 +164,10 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 
 					const loader = getLoader(loaders, file.path);
 
+					if (!loader) {
+						throw new Error(`Couldn't find loader for import "${fragment}"\n  File path: ${file.path}`);
+					}
+
 					return loader(file, mergedOpts)
 						.then(r => r.root);
 				});
@@ -191,7 +180,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 			let mergedOpts = Object.assign({}, opts, options);
 
 			return Promise.resolve()
-				.then(() => globPromise(unresolved))
+				.then(() => glob(unresolved))
 				.then(matches => {
 					// Early-out for globbed files
 					if (dedupe) {
@@ -284,6 +273,8 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 						} else {
 							node.remove();
 						}
+					}).catch(err => {
+						node.warn(result, err && err.message || err);
 					});
 				}
 			});
