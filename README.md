@@ -1,5 +1,9 @@
 # postcss-sassy-import
 
+[![npm version](https://img.shields.io/npm/v/postcss-sassy-import.svg)](https://www.npmjs.com/package/postcss-sassy-import)
+![node version](https://img.shields.io/badge/node-%3E=5.0-brightgreen.svg)
+![license](https://img.shields.io/badge/license-MIT-blue.svg)
+
 ```sh
 npm install postcss-sassy-import
 ```
