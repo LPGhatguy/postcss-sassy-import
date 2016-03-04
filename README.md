@@ -140,6 +140,8 @@ gulp.task("styles", () => {
 ## Configuration
 postcss-sassy-import takes in some configuration options and does some stuff with them.
 
+** Setting a list configuration here will add new options to the end of the list. To replace or remove existing values, add a plugin. **
+
 #### dedupe
 - `boolean`
 - default: `true`
