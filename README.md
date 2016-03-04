@@ -154,6 +154,8 @@ A list of formats to try to resolve a path with. `%` in the string is replaced w
 
 A list of paths to load. Paths are specified with functions that are passed the file an import is being called from. They should return an absolute path to load from.
 
+**NYI: Though this feature is handled as a valid option by the plugin at this time, it does not currently do anything.**
+
 #### loaders
 - `array`
 - default: see source (loads scss, css, and json)
