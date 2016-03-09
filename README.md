@@ -28,6 +28,7 @@ The authors of postcss-import are trying to [follow the CSS specification](https
 Write imports how you want to write them:
 
 ```scss
+@import "foundation" !not-sassy;
 @import "config.json";
 @import "reset";
 @import "components/**/*.scss";
@@ -40,6 +41,7 @@ my-scope {
 Get output like you expect:
 
 ```scss
+@import "foundation";
 /* contents of config.json */
 /* contents of reset.css */
 /* contents of all scss files in components/ */
@@ -118,6 +120,18 @@ third-scope {
 }
 ```
 
+### Import Flags
+Imports can be tagged with "flags" to alter their behavior. Their usage is `@import "path" !flag`
+
+### `!multiple`
+Allows the import to be run more than one time. This cascades to all imports inside the imported file, unless they have `!once`
+
+### `!once`
+Explicitly marks an import as only being importable once.
+
+### `!not-sassy`
+Tells postcss-sassy-import not to process this import. Useful for external Sass dependencies, like Foundation.
+
 ### gulp
 If you use gulp, use postcss-sassy-import with gulp-postcss:
 
@@ -142,6 +156,12 @@ postcss-sassy-import takes in some configuration options and does some stuff wit
 
 **Setting a list configuration here will add new options to the end of the list. To replace or remove existing values, add a plugin.**
 
+#### debug
+- `boolean`
+- default: `false`
+
+Shows stack traces for errors, useful for developing postcss-sassy-import itself.
+
 #### dedupe
 - `boolean`
 - default: `true`
@@ -155,18 +175,42 @@ Enable to deduplicate imports by default. Opt in and out of deduplication by usi
 A list of formats to try to resolve a path with. `%` in the string is replaced with the file name, and the directory of the file is prepended to the result.
 
 #### loadPaths
-- `(() => string)[]`
+- `(origin => string)[]`
 - default: see source (loads current directory)
 
-A list of paths to load. Paths are specified with functions that are passed the file an import is being called from. They should return an absolute path to load from.
+A list of paths to load from. Paths are specified with functions that are passed the file an import is being called from. They should return an absolute path to load from.
 
-**NYI: Though this feature is handled as a valid option by the plugin at this time, it does not currently do anything.**
+The built-in load path loads relative to the file an import is in, which looks like this:
+
+```js
+origin => path.dirname(origin)
+```
+
+To add `./components` to the list of paths to load, you could use:
+
+```js
+origin => path.join(path.dirname(origin), "components")
+```
+
+To load files from `node_modules` in the root of your project, you might use:
+
+```js
+origin => path.join(process.cwd(), "node_modules")
+```
+
+This load path, coupled with the default formats list, means that any installed module with a `style.scss` in it can be imported.
+
+*This relies on the Node.js 'path' library being loaded.*
 
 #### loaders
 - `array`
 - default: see source (loads scss, css, and json)
 
-A loader is an object with two fields, `test` and `method`. `test` is a function taking the path of the file, returning whether this loader is applicable. `method` is a method to return a PostCSS `Root` element from a wrapped file.
+A loader is an object with two fields, `test` and `method`.
+
+`test` is a function taking the path of the file, returning whether this loader is applicable.
+
+`method` is a function that returns a Promise yielding a PostCSS `Root` element from a wrapped file.
 
 Wrapped files have two fields:
 - `contents`: The contents of the file
@@ -178,7 +222,7 @@ Wrapped files have two fields:
 
 Plugins are run when postcss-sassy-import is called. They are passed the options that were given and are expected to mutate them.
 
-This is a good place to add new loaders and formats.
+This is a good place to add new loaders and formats if they're sensitive to ordering.
 
 ## Contributing
 Pull requests and issues welcome!

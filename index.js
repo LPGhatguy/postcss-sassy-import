@@ -75,7 +75,7 @@ function applyDefaultOptions(opts) {
 			method: (wrapped, opts) => {
 				opts = opts || {};
 
-				return postcss([ plugin(opts) ])
+				return postcss([ plugin(opts, true) ])
 					.process(wrapped.contents, {
 						from: wrapped.path,
 						syntax: syntaxSCSS
@@ -87,7 +87,7 @@ function applyDefaultOptions(opts) {
 			method: (wrapped, opts) => {
 				opts = opts || {};
 
-				return postcss([ plugin(opts) ])
+				return postcss([ plugin(opts, true) ])
 					.process(wrapped.contents, {
 						from: wrapped.path
 					});
@@ -100,7 +100,7 @@ function applyDefaultOptions(opts) {
 
 				const scss = toSCSS.fromRootObject(data);
 
-				return postcss([ plugin(opts) ])
+				return postcss([ plugin(opts, true) ])
 					.process(scss, {
 						from: wrapped.path,
 						syntax: syntaxSCSS
@@ -117,20 +117,24 @@ function applyDefaultOptions(opts) {
 		opts.loaders = defaultLoaders.slice();
 	}
 
-	opts.resolver = opts.resolver || ((unresolved) => fsUtil.resolvePath(opts.formats, unresolved));
+	if (!opts.resolver) {
+		opts.resolver = (origin, unresolved) => {
+			return fsUtil.resolvePath(opts.formats, opts.loadPaths, origin, unresolved);
+		};
+	}
 }
 
-plugin = postcss.plugin("postcss-sassy-import", function(opts) {
+plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 	opts = Object.assign({}, opts) || {};
 
-	applyDefaultOptions(opts);
+	if (!child) {
+		applyDefaultOptions(opts);
 
-	if (opts.plugins) {
-		opts.plugins.forEach(plugin => {
-			plugin(opts);
-		});
-
-		delete opts.plugins;
+		if (opts.plugins) {
+			opts.plugins.forEach(plugin => {
+				plugin(opts);
+			});
+		}
 	}
 
 	const loaded = opts.loaded;
@@ -140,14 +144,14 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 
 	return (css, result) => {
 		// Returns Promise<PostCSSNode>
-		const processNormal = (unresolved, fragment, options) => {
+		const processNormal = (origin, fragment, options) => {
 			const dedupe = options.dedupe;
 
 			let mergedOpts = Object.assign({}, opts, options);
 
 			return Promise.resolve()
 				.then(() => {
-					const possible = resolver(unresolved);
+					const possible = resolver(origin, fragment);
 
 					return fsUtil.getFileOneOf(possible);
 				})
@@ -174,13 +178,36 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 		};
 
 		// Returns Promise<PostCSSNode[]>
-		const processGlob = (unresolved, fragment, options) => {
+		const processGlob = (origin, fragment, options) => {
 			const dedupe = options.dedupe;
 
 			let mergedOpts = Object.assign({}, opts, options);
 
+			const paths = resolver(origin, fragment);
+
 			return Promise.resolve()
-				.then(() => glob(unresolved))
+				.then(() => {
+					const proms = [];
+
+					paths.forEach(filePath => {
+						proms.push(glob(filePath));
+					});
+
+					return Promise.all(proms)
+						.then(results => {
+							const set = new Set();
+
+							for (const result of results) {
+								for (const item of result) {
+									set.add(path.normalize(item));
+								}
+							}
+
+							const out = Array.from(set);
+
+							return out;
+						});
+				})
 				.then(matches => {
 					// Early-out for globbed files
 					if (dedupe) {
@@ -240,6 +267,12 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 
 				let dedupeThis = dedupe;
 
+				if (modes.indexOf("!not-sassy") > -1) {
+					node.params = "\"" + matches[1] + "\"";
+
+					return;
+				}
+
 				if (modes.indexOf("!once") > -1) {
 					dedupeThis = true;
 				} else if (modes.indexOf("!multiple") > -1) {
@@ -248,11 +281,9 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 
 				const origin = node.source.input.file;
 
-				const unresolved = path.normalize(path.join(path.dirname(origin), fragment));
-
 				if (glob.hasMagic(fragment)) {
 					prom = prom.then(() => {
-						return processGlob(unresolved, fragment, {
+						return processGlob(origin, fragment, {
 							dedupe: dedupeThis
 						});
 					}).then(newNodes => {
@@ -264,7 +295,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 					});
 				} else {
 					prom = prom.then(() => {
-						return processNormal(unresolved, fragment, {
+						return processNormal(origin, fragment, {
 							dedupe: dedupeThis
 						});
 					}).then(newNode => {
@@ -275,6 +306,10 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts) {
 						}
 					}).catch(err => {
 						node.warn(result, err && err.message || err);
+
+						if (opts.debug) {
+							console.error(err.stack.replace("\\n", "\n"))
+						}
 					});
 				}
 			});

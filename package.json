@@ -1,7 +1,7 @@
 {
   "name": "postcss-sassy-import",
-  "version": "0.2.0",
-  "description": "A sassy import targeted at PostCSS + Sass pipelines",
+  "version": "0.3.0",
+  "description": "A Sass-like import targeted at PostCSS pipelines",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
