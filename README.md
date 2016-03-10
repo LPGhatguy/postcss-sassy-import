@@ -29,6 +29,7 @@ Write imports how you want to write them:
 
 ```scss
 @import "foundation" !not-sassy;
+@import "./local.css";
 @import "config.json";
 @import "reset";
 @import "components/**/*.scss";
@@ -42,8 +43,9 @@ Get output like you expect:
 
 ```scss
 @import "foundation";
+/* Contents of ./local.css */
 /* contents of config.json */
-/* contents of reset.css */
+/* contents of one of _reset.scss, reset.scss, reset.css or others */
 /* contents of all scss files in components/ */
 
 my-scope {
