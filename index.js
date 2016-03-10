@@ -31,6 +31,9 @@ function getLoader(loaders, filePath) {
 	}
 }
 
+/**
+ * Fills in missing options in an option object with defaults
+ */
 function applyDefaultOptions(opts) {
 	// Files that have already been loaded
 	opts.loaded = opts.loaded || new Set();
@@ -38,6 +41,8 @@ function applyDefaultOptions(opts) {
 	opts.dedupe = opts.dedupe != null ? !!opts.dedupe : true;
 
 	// File formats we accept
+	// % is replaced with the path leaf
+	// The dirname of the file is prepended
 	const defaultFormats = [
 		"%", // full file path
 		"%.scss", // SCSS
@@ -55,6 +60,7 @@ function applyDefaultOptions(opts) {
 		opts.formats = defaultFormats.slice();
 	}
 
+	// A list of functions that return a path to load relative to
 	const defaultLoadPaths = [
 		(origin) => path.dirname(origin)
 	];
@@ -71,6 +77,7 @@ function applyDefaultOptions(opts) {
 	// For these loaders, the only plugin PostCSS needs is this import plugin.
 	// All other plugins will run over the source afterwards.
 	const defaultLoaders = [
+		// Sass (SCSS syntax)
 		{
 			test: (file) => /\.scss$/.test(file),
 			method: (wrapped, opts) => {
@@ -83,6 +90,7 @@ function applyDefaultOptions(opts) {
 					});
 			}
 		},
+		// CSS
 		{
 			test: (file) => /\.css$/.test(file),
 			method: (wrapped, opts) => {
@@ -94,6 +102,7 @@ function applyDefaultOptions(opts) {
 					});
 			}
 		},
+		// JSON (as SCSS variables)
 		{
 			test: (file) => /\.json$/.test(file),
 			method: (wrapped, opts) => {
@@ -118,16 +127,20 @@ function applyDefaultOptions(opts) {
 		opts.loaders = defaultLoaders.slice();
 	}
 
+	// A function to take a list of origins, the fragment, and options
+	// It returns a list of possible paths
 	if (!opts.resolver) {
-		opts.resolver = (origin, fragment) => {
+		opts.resolver = (origin, fragment, opts) => {
 			return fsUtil.resolvePath(opts.formats, opts.loadPaths, origin, fragment);
 		};
 	}
 
+	// PostCSS plugins to apply to imported files, but not the root one
 	if (!opts.postPlugins) {
 		opts.postPlugins = [];
 	}
 
+	// A list of functions to apply to the options table
 	if (opts.plugins) {
 		opts.plugins.forEach(plugin => {
 			plugin(opts);
@@ -156,7 +169,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 
 			return Promise.resolve()
 				.then(() => {
-					const possible = resolver(origin, fragment);
+					const possible = resolver(origin, fragment, opts);
 
 					return fsUtil.getFileOneOf(possible);
 				})
@@ -188,7 +201,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 
 			let mergedOpts = Object.assign({}, opts, options);
 
-			const paths = resolver(origin, fragment);
+			const paths = resolver(origin, fragment, opts);
 
 			return Promise.resolve()
 				.then(() => {
@@ -274,6 +287,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 				let dedupeThis = dedupe;
 
 				if (modes.indexOf("!not-sassy") > -1) {
+					// TODO: replace everything except !not-sassy?
 					node.params = "\"" + matches[1] + "\"";
 
 					return;
