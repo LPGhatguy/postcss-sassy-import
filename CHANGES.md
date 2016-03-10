@@ -3,7 +3,7 @@
 - Added support for explicit relative paths (`./path.css`)
 - Added support for absolute paths (`/usr/bin/file.css`)
 - Added `!not-sassy` flag for skipping import processing
-- Added `!optional` flag for optional imports (WiP)
+- Added `!optional` flag for optional imports
 - Fixed settings cascading out of control on nested imports
 
 # 0.2.0

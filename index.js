@@ -265,12 +265,17 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 				const modes = matches[2].trim().split(" ");
 				const fragment = matches[1];
 
+				let isOptional = false;
 				let dedupeThis = dedupe;
 
 				if (modes.indexOf("!not-sassy") > -1) {
 					node.params = "\"" + matches[1] + "\"";
 
 					return;
+				}
+
+				if (modes.indexOf("!optional") > -1) {
+					isOptional = true;
 				}
 
 				if (modes.indexOf("!once") > -1) {
@@ -305,10 +310,14 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 							node.remove();
 						}
 					}).catch(err => {
-						node.warn(result, err && err.message || err);
+						if (isOptional) {
+							node.remove();
+						} else {
+							node.warn(result, err && err.message || err);
 
-						if (opts.debug) {
-							console.error(err.stack.replace("\\n", "\n"))
+							if (opts.debug) {
+								console.error(err.stack.replace("\\n", "\n"))
+							}
 						}
 					});
 				}
