@@ -1,6 +1,7 @@
 /**
  * PostCSS Sassy Import
  * Implements imports like Sass, plus:
+ * - Globbing support
  * - Import only one time by default
  * - Import Sass, CSS, and JSON files
  */
