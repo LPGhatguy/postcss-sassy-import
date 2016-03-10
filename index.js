@@ -75,7 +75,7 @@ function applyDefaultOptions(opts) {
 			method: (wrapped, opts) => {
 				opts = opts || {};
 
-				return postcss([ plugin(opts, true) ])
+				return postcss([ plugin(opts, true), ...opts.postPlugins ])
 					.process(wrapped.contents, {
 						from: wrapped.path,
 						syntax: syntaxSCSS
@@ -87,7 +87,7 @@ function applyDefaultOptions(opts) {
 			method: (wrapped, opts) => {
 				opts = opts || {};
 
-				return postcss([ plugin(opts, true) ])
+				return postcss([ plugin(opts, true), ...opts.postPlugins ])
 					.process(wrapped.contents, {
 						from: wrapped.path
 					});
@@ -100,7 +100,7 @@ function applyDefaultOptions(opts) {
 
 				const scss = toSCSS.fromRootObject(data);
 
-				return postcss([ plugin(opts, true) ])
+				return postcss([ plugin(opts, true), ...opts.postPlugins ])
 					.process(scss, {
 						from: wrapped.path,
 						syntax: syntaxSCSS
@@ -122,6 +122,16 @@ function applyDefaultOptions(opts) {
 			return fsUtil.resolvePath(opts.formats, opts.loadPaths, origin, fragment);
 		};
 	}
+
+	if (!opts.postPlugins) {
+		opts.postPlugins = [];
+	}
+
+	if (opts.plugins) {
+		opts.plugins.forEach(plugin => {
+			plugin(opts);
+		});
+	}
 }
 
 plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
@@ -129,12 +139,6 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 
 	if (!child) {
 		applyDefaultOptions(opts);
-
-		if (opts.plugins) {
-			opts.plugins.forEach(plugin => {
-				plugin(opts);
-			});
-		}
 	}
 
 	const loaded = opts.loaded;
