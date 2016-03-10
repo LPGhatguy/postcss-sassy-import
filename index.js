@@ -276,6 +276,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 				// Strip off quotes, single and double
 				const matches = node.params.trim().match(/^['"](.+?)['"](.*)/);
 
+				// Imports that don't have quotes aren't important to us
 				if (matches == null) {
 					return;
 				}
@@ -286,6 +287,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 				let isOptional = false;
 				let dedupeThis = dedupe;
 
+				// Imports we should ignore
 				if (modes.indexOf("!not-sassy") > -1) {
 					// TODO: replace everything except !not-sassy?
 					node.params = "\"" + matches[1] + "\"";
@@ -306,11 +308,15 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 				const origin = node.source.input.file;
 
 				if (glob.hasMagic(fragment)) {
+					// Globbed imports
+
 					prom = prom.then(() => {
 						return processGlob(origin, fragment, {
 							dedupe: dedupeThis
 						});
 					}).then(newNodes => {
+						// If we have nodes, put 'em in!
+
 						if (newNodes.length > 0) {
 							node.replaceWith(...newNodes);
 						} else {
@@ -318,22 +324,29 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 						}
 					});
 				} else {
+					// Regular imports
+
 					prom = prom.then(() => {
 						return processNormal(origin, fragment, {
 							dedupe: dedupeThis
 						});
 					}).then(newNode => {
+						// Did we get a node out of this?
+
 						if (newNode) {
 							node.replaceWith(newNode);
 						} else {
 							node.remove();
 						}
 					}).catch(err => {
+						// THAT isn't a node!
+
 						if (isOptional) {
 							node.remove();
 						} else {
-							node.warn(result, err && err.message || err);
+							node.warn(result, err ? err.message : err);
 
+							// Error.stack is far more useful
 							if (opts.debug) {
 								console.error(err.stack.replace("\\n", "\n"))
 							}
