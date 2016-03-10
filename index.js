@@ -118,8 +118,8 @@ function applyDefaultOptions(opts) {
 	}
 
 	if (!opts.resolver) {
-		opts.resolver = (origin, unresolved) => {
-			return fsUtil.resolvePath(opts.formats, opts.loadPaths, origin, unresolved);
+		opts.resolver = (origin, fragment) => {
+			return fsUtil.resolvePath(opts.formats, opts.loadPaths, origin, fragment);
 		};
 	}
 }
@@ -169,7 +169,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 					const loader = getLoader(loaders, file.path);
 
 					if (!loader) {
-						throw new Error(`Couldn't find loader for import "${fragment}"\n  File path: ${file.path}`);
+						throw new Error(`Couldn't find loader for import "${fragment}"\n  Found file at path: ${file.path}`);
 					}
 
 					return loader(file, mergedOpts)
@@ -209,7 +209,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 						});
 				})
 				.then(matches => {
-					// Early-out for globbed files
+					// Early-out for duplicate globbed files
 					if (dedupe) {
 						matches = matches.filter(file => !loaded.has(file));
 					}
