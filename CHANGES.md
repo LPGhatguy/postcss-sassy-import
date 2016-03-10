@@ -1,5 +1,6 @@
 # 0.3.0 (WiP)
-- Made 'loadPaths' option function
+- Made `loadPaths` option work as expected
+- Added `postPlugins` option
 - Added support for explicit relative paths (`./path.css`)
 - Added support for absolute paths (`/usr/bin/file.css`)
 - Added `!not-sassy` flag for skipping import processing

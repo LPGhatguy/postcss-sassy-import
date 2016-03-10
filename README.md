@@ -226,6 +226,14 @@ Plugins are run when postcss-sassy-import is called. They are passed the options
 
 This is a good place to add new loaders and formats if they're sensitive to ordering.
 
+#### postPlugins
+- `array`
+- default: `[]`
+
+An array of PostCSS plugins to run on imports before inlining them into the syntax tree.
+
+These plugins are not run on the root file.
+
 ## Contributing
 Pull requests and issues welcome!
 
