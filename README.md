@@ -144,12 +144,12 @@ const sass = require("gulp-sass");
 const sassyImport = require("postcss-sassy-import");
 
 gulp.task("styles", () => {
-	return gulp.src("main.scss")
+	return gulp.src("src/main.scss")
 		.pipe(postcss([ sassyImport({
 			// Put your configuration here!
 		}) ]))
 		.pipe(sass())
-		.pipe(gulp.dest("main.css"))
+		.pipe(gulp.dest("css/"))
 });
 ```
 
