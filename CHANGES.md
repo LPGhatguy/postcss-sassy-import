@@ -1,4 +1,8 @@
-# 0.3.0 (WiP)
+# 1.0.0
+- Fixed errors bubbling in strange ways
+- Improved documentation
+
+# 0.3.0
 - Made `loadPaths` option work as expected
 - Added `postPlugins` option
 - Added support for explicit relative paths (`./path.css`)
