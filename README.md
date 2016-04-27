@@ -238,7 +238,7 @@ These plugins are not run on the root file.
 - `object`
 - default: `{}`
 
-An object defining virtual files to use in both single imports and globs.
+An object defining virtual files to use in both single imports and globs. The key of the object is the file path, and the value is the contents of the file.
 
 ## Contributing
 Pull requests and issues welcome!
