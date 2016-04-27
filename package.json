@@ -1,6 +1,6 @@
 {
   "name": "postcss-sassy-import",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A Sass-like import targeted at PostCSS pipelines",
   "main": "index.js",
   "scripts": {
@@ -24,7 +24,8 @@
   "dependencies": {
     "glob": "^7.0.0",
     "postcss": "^5.0.17",
-    "postcss-scss": "^0.1.5"
+    "postcss-scss": "^0.1.5",
+    "minimatch": "^3.0.0"
   },
   "engines": {
     "node": ">=5.0"

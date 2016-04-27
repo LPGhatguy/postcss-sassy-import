@@ -1,3 +1,6 @@
+# 1.1.0
+- Added `vfs` attribute for adding virtual files to the system
+
 # 1.0.0
 - Fixed errors bubbling in strange ways
 - Improved documentation

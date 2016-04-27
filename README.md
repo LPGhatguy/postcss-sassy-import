@@ -234,6 +234,12 @@ An array of PostCSS plugins to run on imports before inlining them into the synt
 
 These plugins are not run on the root file.
 
+#### vfs
+- `object`
+- default: `{}`
+
+An object defining virtual files to use in both single imports and globs.
+
 ## Contributing
 Pull requests and issues welcome!
 

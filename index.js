@@ -12,6 +12,7 @@
 let plugin;
 
 const path = require("path");
+const minimatch = require("minimatch");
 
 const glob = require("./lib/glob");
 const fsUtil = require("./lib/fs-util");
@@ -159,6 +160,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 	const dedupe = opts.dedupe;
 	const loaders = opts.loaders;
 	const resolver = opts.resolver;
+	const vfs = opts.vfs;
 
 	return (css, result) => {
 		// Returns Promise<PostCSSNode>
@@ -171,7 +173,10 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 				.then(() => {
 					const possible = resolver(origin, fragment, opts);
 
-					return fsUtil.getFileOneOf(possible);
+					return fsUtil.getFileOneOf(possible, vfs)
+						.catch(() => {
+							return new Error("Couldn't find any of the given files:\n- " + possible.join("\n- "));
+						});
 				})
 				.then((file) => {
 					if (file instanceof Error) {
@@ -209,6 +214,16 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 
 					paths.forEach(filePath => {
 						proms.push(glob(filePath));
+
+						for (const key in vfs) {
+							if (!vfs.hasOwnProperty(key)) {
+								continue;
+							}
+
+							if (minimatch(key, filePath)) {
+								proms.push(Promise.resolve([key]));
+							}
+						}
 					});
 
 					return Promise.all(proms)
@@ -232,7 +247,7 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 						matches = matches.filter(file => !loaded.has(file));
 					}
 
-					return fsUtil.getFilesAllOf(matches);
+					return fsUtil.getFilesAllOf(matches, vfs);
 				}).then(matches => {
 					// Progressively build up a PostCSSNode[]
 					let prom = Promise.resolve([]);
