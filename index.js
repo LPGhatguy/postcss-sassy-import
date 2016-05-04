@@ -109,7 +109,11 @@ function applyDefaultOptions(opts) {
 			method: (wrapped, opts) => {
 				const data = JSON.parse(wrapped.contents);
 
-				const scss = toSCSS.fromRootObject(data);
+				const unquoteStrings = opts.modes.indexOf("!unquote-strings") > -1;
+
+				const scss = toSCSS.fromRootObject(data, {
+					unquoteStrings: unquoteStrings
+				});
 
 				return postcss([ plugin(opts, true), ...opts.postPlugins ])
 					.process(scss, {
@@ -327,7 +331,8 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 
 					prom = prom.then(() => {
 						return processGlob(origin, fragment, {
-							dedupe: dedupeThis
+							dedupe: dedupeThis,
+							modes: modes
 						});
 					}).then(newNodes => {
 						// If we have nodes, put 'em in!
@@ -343,7 +348,8 @@ plugin = postcss.plugin("postcss-sassy-import", function(opts, child) {
 
 					prom = prom.then(() => {
 						return processNormal(origin, fragment, {
-							dedupe: dedupeThis
+							dedupe: dedupeThis,
+							modes: modes
 						});
 					}).then(newNode => {
 						// Did we get a node out of this?

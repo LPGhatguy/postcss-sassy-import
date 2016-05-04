@@ -1,3 +1,7 @@
+# 1.2.0
+- Added `!unquote-strings` flag to JSON importing
+	- Unquotes strings, allowing use of dynamic data without Sass's `unquote`!
+
 # 1.1.0
 - Added `vfs` attribute for adding virtual files to the system
 

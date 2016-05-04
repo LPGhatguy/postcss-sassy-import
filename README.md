@@ -134,6 +134,11 @@ Explicitly marks an import as only being importable once.
 ### `!not-sassy`
 Tells postcss-sassy-import not to process this import. Useful for external Sass dependencies, like Foundation.
 
+### `!unquote-strings` (1.2.0+)
+**Only applicable when importing JSON**
+
+Causes all imported strings to be unquoted, suitable for dynamic content like colors. 
+
 ### gulp
 If you use gulp, use postcss-sassy-import with gulp-postcss:
 
