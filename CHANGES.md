@@ -1,3 +1,6 @@
+# 1.2.1
+- Fixed JSON import for nested objects
+
 # 1.2.0
 - Added `!unquote-strings` flag to JSON importing
 	- Unquotes strings, allowing use of dynamic data without Sass's `unquote`!
