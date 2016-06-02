@@ -26,6 +26,8 @@ const syntaxSCSS = require("postcss-scss");
  */
 function getLoader(loaders, filePath) {
 	for (let loader of loaders) {
+		console.log("LOADER", loader);
+
 		if (loader.test(filePath)) {
 			return loader.method;
 		}
@@ -127,7 +129,7 @@ function applyDefaultOptions(opts) {
 	if (opts.loaders) {
 		let loaders = opts.loaders;
 
-		opts.loaders = [...defaultLoaders, opts.loaders];
+		opts.loaders = [...defaultLoaders, ...opts.loaders];
 	} else {
 		opts.loaders = defaultLoaders.slice();
 	}

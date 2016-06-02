@@ -1,3 +1,6 @@
+# 1.2.2
+- Fixed loaders array not being unpacked
+
 # 1.2.1
 - Fixed JSON import for nested objects
 
