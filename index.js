@@ -26,8 +26,6 @@ const syntaxSCSS = require("postcss-scss");
  */
 function getLoader(loaders, filePath) {
 	for (let loader of loaders) {
-		console.log("LOADER", loader);
-
 		if (loader.test(filePath)) {
 			return loader.method;
 		}

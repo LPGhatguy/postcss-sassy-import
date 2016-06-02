@@ -1,3 +1,6 @@
+# 1.2.3
+- Removed accidental debug prompt
+
 # 1.2.2
 - Fixed loaders array not being unpacked
 
