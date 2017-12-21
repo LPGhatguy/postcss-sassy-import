@@ -4,6 +4,8 @@
 ![node version](https://img.shields.io/badge/node-%3E=5.0-brightgreen.svg)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
+**Hey! I'm not actively working on this project anymore. Pull requests are welcome!**
+
 ```sh
 npm install postcss-sassy-import
 ```
