@@ -4,7 +4,8 @@
 ![node version](https://img.shields.io/badge/node-%3E=5.0-brightgreen.svg)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
-**Hey! I'm not actively working on this project anymore. Pull requests are welcome!**
+## Hey! I'm not actively working on this project anymore.
+Pull requests and issues are welcome, but since I don't use this in any of my active projects, I don't have any time to make new changes.
 
 ```sh
 npm install postcss-sassy-import
